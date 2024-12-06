@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: keycloak-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - C:/docker/volumes/keycloak/postgres_data:/var/lib/postgresql/data
+    networks:
+      - keycloak-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.6
+    container_name: keycloak
+    ports:
+      - '8069:8080'
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8069
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+      KC_HOSTNAME_PATH: /
+      KC_HOSTNAME_ADMIN_URL: http://localhost:8069/
+      KC_HTTP_CORS: "true"
+      KC_HTTP_CORS_ALLOWED_ORIGINS: "*"
+      KC_HTTP_CORS_ALLOWED_METHODS: "POST,PUT,DELETE,GET,OPTIONS"
+      KC_HTTP_CORS_ALLOWED_HEADERS: "Authorization,Content-Type"
+      KC_HTTP_CORS_EXPOSED_HEADERS: "Authorization"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - C:/docker/volumes/keycloak/data:/opt/keycloak/data
+    networks:
+      - keycloak-network
+    command: start-dev
+
+networks:
+  keycloak-network:
