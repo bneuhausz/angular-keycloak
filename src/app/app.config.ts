@@ -5,6 +5,8 @@ import { routes } from './app.routes';
 import { initializeKeycloak } from './keycloak-init';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './shared/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +14,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(KeycloakAngularModule),
     provideAppInitializer(() => initializeKeycloak(inject(KeycloakService))),
     provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync()
   ]
 };
