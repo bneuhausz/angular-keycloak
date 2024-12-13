@@ -1,19 +1,12 @@
-import { KeycloakEventType, KeycloakService } from 'keycloak-angular';
+import { KeycloakService } from 'keycloak-angular';
+import { environment } from '../environments/environment.development';
 
 export function initializeKeycloak (keycloak: KeycloakService) {
-  keycloak.keycloakEvents$.subscribe({
-    next(event) {
-      if (event.type == KeycloakEventType.OnTokenExpired) {
-        keycloak.updateToken(20);
-      }
-    },
-  });
-
   return keycloak.init({
     config: {
-      url: 'http://localhost:8069',
-      realm: 'myrealm',
-      clientId: 'myclient',
+      url: environment.keycloak.url,
+      realm: environment.keycloak.realm,
+      clientId: environment.keycloak.clientId,
     },
     loadUserProfileAtStartUp: true,
     initOptions: {
@@ -21,7 +14,7 @@ export function initializeKeycloak (keycloak: KeycloakService) {
       silentCheckSsoRedirectUri:
         window.location.origin + '/assets/silent-check-sso.html',
       checkLoginIframe: false,
-      redirectUri: 'http://localhost:4200/',
+      redirectUri: environment.keycloak.redirectUri,
     },
     bearerExcludedUrls: ['/assets'],
   });

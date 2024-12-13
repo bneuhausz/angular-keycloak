@@ -4,7 +4,8 @@ import { Component, inject } from '@angular/core';import { AuthService } from '.
 @Component({
   selector: 'app-login',
   template: `
-  <p>{{ authService.currentUser() }}</p>
+    <p>{{ authService.currentUser() }}</p>
+    <p>{{ authService.accessToken() }}</p>
     <button (click)="authService.login$.next()">login</button>
     <button (click)="authService.logout$.next()">logout</button>
   `,

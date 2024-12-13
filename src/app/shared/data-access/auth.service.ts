@@ -1,12 +1,12 @@
 import { computed, inject, Injectable, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { KeycloakEventType, KeycloakService } from "keycloak-angular";
-import { EMPTY, filter, Subject, switchMap } from "rxjs";
+import { filter, from, Subject, switchMap } from "rxjs";
+import { environment } from "../../../environments/environment.development";
 
 export interface AuthState {
   currentUser: string | null;
-  loading: boolean;
-  error: string | null;
+  accessToken: string | null;
 }
 
 @Injectable({
@@ -17,46 +17,69 @@ export class AuthService {
 
   readonly #state = signal<AuthState>({
     currentUser: null,
-    loading: false,
-    error: null,
+    accessToken: null,
   });
 
   //selectors
   currentUser = computed(() => this.#state().currentUser);
+  accessToken = computed(() => this.#state().accessToken);
 
   //sources
   login$ = new Subject<void>();
   logout$ = new Subject<void>();
 
-  private readonly loggedOut$ = this.keycloakService.keycloakEvents$.pipe(
-    takeUntilDestroyed(),
-    filter(event => event.type === KeycloakEventType.OnAuthLogout),
-    switchMap(() => EMPTY),
-  );
+  private readonly getToken$ = from(this.keycloakService.getToken())
+    .pipe(
+      takeUntilDestroyed()
+    );
+
+  private readonly tokenExpired$ = this.keycloakService.keycloakEvents$
+    .pipe(
+      takeUntilDestroyed(),
+      filter((event) => event.type === KeycloakEventType.OnTokenExpired),
+      switchMap(() => from(this.keycloakService.updateToken(20)))
+    );
 
   constructor() {
-    if (this.keycloakService.isLoggedIn()) {
-      this.#state.update((state) => ({
-        ...state,
-        currentUser: this.keycloakService.getUsername(),
-        loading: false,
-        error: null,
-      }));
-    }
+    this.initializeAuthState();
 
     this.login$.subscribe(() => {
-      this.keycloakService.login();
+      this.login();
     });
 
     this.logout$.subscribe(() => {
-      this.keycloakService.logout('http://localhost:4200');
+      this.logout();
     });
 
-    this.loggedOut$.subscribe(() => {
-      this.#state.update((state) => ({
-        ...state,
-        currentUser: null,
-      }));
+    this.tokenExpired$.subscribe(() => {
+      this.getToken$.subscribe((token) => {
+        this.#state.update((state) => ({
+          ...state,
+          accessToken: token,
+        }));
+      });
     });
+  }
+
+  private login() {
+    if (!this.keycloakService.isLoggedIn()) {
+      this.keycloakService.login();
+    }
+  }
+
+  private logout() {
+    this.keycloakService.logout(environment.keycloak.redirectUri);
+  }
+
+  private initializeAuthState() {
+    if (this.keycloakService.isLoggedIn()) {
+      this.getToken$.subscribe((token) => 
+        this.#state.update((state) => ({
+          ...state,
+          currentUser: this.keycloakService.getUsername(),
+          accessToken: token,
+        }))
+      );
+    }
   }
 }
