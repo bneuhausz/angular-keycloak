@@ -1,16 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { LayoutComponent } from './shared/ui/layout.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [LayoutComponent],
   template: `
-    <h1>Welcome to {{title}}!</h1>
-
-    <router-outlet />
+    <app-layout />
   `,
-  styles: [],
 })
-export class AppComponent {
-  title = 'angular-keycloak';
-}
+export class AppComponent {}

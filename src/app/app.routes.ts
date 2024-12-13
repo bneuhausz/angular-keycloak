@@ -3,8 +3,8 @@ import { isAuthenticatedGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   {
-    path: 'auth',
-    loadChildren: () => import('./auth/auth.routes').then((m) => m.AUTH_ROUTES),
+    path: 'unauthorized',
+    loadComponent: () => import('./unauthorized/unauthorized.component'),
   },
   {
     path: 'home',
