@@ -6,5 +6,4 @@ import { Component } from '@angular/core';
     <p>Home</p>
   `,
 })
-export default class HomeComponent {
-}
+export default class HomeComponent {}

@@ -6,6 +6,7 @@ import { environment } from "../../../environments/environment.development";
 
 export interface AuthState {
   currentUser: string | null;
+  isUserManager: boolean;
   accessToken: string | null;
 }
 
@@ -17,12 +18,14 @@ export class AuthService {
 
   readonly #state = signal<AuthState>({
     currentUser: null,
+    isUserManager: false,
     accessToken: null,
   });
 
   //selectors
   currentUser = computed(() => this.#state().currentUser);
   accessToken = computed(() => this.#state().accessToken);
+  isUserManager = computed(() => this.#state().isUserManager);
 
   //sources
   login$ = new Subject<void>();
@@ -77,6 +80,7 @@ export class AuthService {
         this.#state.update((state) => ({
           ...state,
           currentUser: this.keycloakService.getUsername(),
+          isUserManager: this.keycloakService.isUserInRole('user-manager'),
           accessToken: token,
         }))
       );

@@ -17,10 +17,10 @@ import { AuthService } from "../data-access/auth.service";
             <span>Home</span>
           </a>
 
-          @if (authService.currentUser()) {
-            <a mat-list-item>
+          @if (authService.currentUser() && authService.isUserManager()) {
+            <a mat-list-item routerLink="user-management">
               <mat-icon matListItemIcon>person_add</mat-icon>
-              <span>User is logged in</span>
+              <span>User Management</span>
             </a>
           }
         </mat-nav-list>
