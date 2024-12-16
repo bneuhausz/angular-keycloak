@@ -1,8 +1,9 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
+import { UserManagementService } from "./data-access/user-management.service";
 
 @Component({
   imports: [],
-  providers: [],
+  providers: [UserManagementService],
   template: `
     <main>
       <h1>User Management</h1>
@@ -10,4 +11,6 @@ import { Component } from "@angular/core";
   `,
   styles: []
 })
-export default class UserManagementComponent {}
+export default class UserManagementComponent {
+  private readonly userManagementService = inject(UserManagementService);
+}

@@ -4,5 +4,8 @@ export const environment = {
     realm: 'dotnet',
     clientId: 'dotnet-public',
     redirectUri: 'http://localhost:4200',
+  },
+  api: {
+    url: '/api',
   }
 };

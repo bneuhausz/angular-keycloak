@@ -7,7 +7,6 @@ export const isUserManagerGuard = (): CanActivateFn => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
-    console.log(authService.isUserManager());
     if (authService.isUserManager()) {
       return true;
     }
