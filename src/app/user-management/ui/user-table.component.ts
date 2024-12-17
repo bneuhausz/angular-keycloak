@@ -42,14 +42,14 @@ import { MatTooltipModule } from "@angular/material/tooltip";
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let user">
-            <!-- <button
+            <button
               mat-mini-fab class="action-button"
               (click)="manageRoles.emit(user.id)"
               matTooltip="Manage roles"
               matTooltipPosition="above"
             >
               <mat-icon>group_add</mat-icon>
-            </button> -->
+            </button>
             <button
               mat-mini-fab class="action-button"
               (click)="resetPassword.emit(user.id)"
@@ -93,7 +93,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
       }
 
       .mat-column-actions {
-        width: 90px;
+        width: 140px;
         text-align: center;
       }
 
@@ -108,7 +108,7 @@ export class UserTableComponent {
   loading = input.required<boolean>();
   pagination = input.required<Pagination>();
   resetPassword = output<string>();
-  //manageRoles = output<string>();
+  manageRoles = output<string>();
   toggleEnabled = output<string>();
   pageChange = output<PartialPaginationWithoutTotal>();
 

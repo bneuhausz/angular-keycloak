@@ -7,10 +7,13 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreateUserDialogComponent } from "./ui/create-user-dialog.component";
 import { ResetPasswordDialogComponent } from "./ui/reset-password-dialog.component";
+import { UserRoleManagementService } from "./data-access/user-role-management.service";
+import { ManageUserRolesDialogComponent } from "./ui/manage-user-roles-dialog.component";
+import { EditUserRole } from "./interfaces/role";
 
 @Component({
   imports: [UserTableComponent, MatCardModule, UserTableToolbarComponent],
-  providers: [UserManagementService],
+  providers: [UserManagementService, UserRoleManagementService],
   template: `
     <main>
       <h1>User Management</h1>
@@ -24,6 +27,7 @@ import { ResetPasswordDialogComponent } from "./ui/reset-password-dialog.compone
           [loading]="userManagementService.loading()"
           [pagination]="userManagementService.pagination()"
           (toggleEnabled)="userManagementService.toggleEnabled$.next($event)"
+          (manageRoles)="openManageRolesDialog($event)"
           (resetPassword)="openResetPasswordDialog($event)"
           (pageChange)="userManagementService.pagination$.next($event)"
         />
@@ -48,6 +52,7 @@ import { ResetPasswordDialogComponent } from "./ui/reset-password-dialog.compone
 })
 export default class UserManagementComponent {
   readonly userManagementService = inject(UserManagementService);
+  readonly userRoleManagementService = inject(UserRoleManagementService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -58,6 +63,29 @@ export default class UserManagementComponent {
         this.userManagementService.createUser$.next(result);
       }      
     });
+  }
+
+  openManageRolesDialog(id: string) {
+    this.userRoleManagementService.userSelected$.next(id);
+    const user = this.userManagementService.users().find(user => user.id === id);
+    const dialogRef = this.dialog.open(ManageUserRolesDialogComponent, {
+      data: {
+        user,
+        roles: this.userRoleManagementService.roles
+      },
+      autoFocus: false,
+    });
+
+    dialogRef.componentInstance.roleToggled.subscribe((event: EditUserRole) => {
+      if (event.checked) {
+        this.userRoleManagementService.addRole$.next(event);
+      }
+      else {
+        this.userRoleManagementService.removeRole$.next(event);
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(() => this.userRoleManagementService.clearRoles$.next());
   }
 
   openResetPasswordDialog(id: string) {
